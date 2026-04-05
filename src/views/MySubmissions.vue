@@ -1,48 +1,11 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRouter, RouterLink } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { ref, onMounted } from "vue";
 import api from "@/api/http";
 import AppHeader from "@/components/AppHeader.vue";
 
-const auth = useAuthStore();
-const router = useRouter();
 const submissions = ref([]);
 const loading = ref(true);
 const error = ref("");
-const imageError = ref(false);
-
-const handleLogout = () => {
-  auth.logout();
-  router.push({ name: "login" });
-};
-
-const getUserAvatar = (user) => {
-  const avatar =
-    user?.avatar ||
-    user?.photo ||
-    user?.profile_picture ||
-    user?.image ||
-    user?.picture;
-
-  if (!avatar) return null;
-
-  if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
-    return avatar;
-  }
-
-  return `http://127.0.0.1:8000${avatar}`;
-};
-
-const userAvatar = computed(() => getUserAvatar(auth.user));
-
-const userInitials = computed(() => {
-  return auth.user?.username?.charAt(0).toUpperCase() || "U";
-});
-
-const handleImageError = () => {
-  imageError.value = true;
-};
 
 onMounted(async () => {
   try {
@@ -115,87 +78,6 @@ onMounted(async () => {
   padding-bottom: 50px;
 }
 
-.topnav {
-  padding: 5vh;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  width: 10%;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: white;
-}
-
-.avatar-container {
-  position: relative;
-}
-
-.user-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid white;
-  background-color: rgba(255, 255, 255, 0.2);
-  display: block;
-}
-
-.avatar-fallback {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.1)
-  );
-  border: 2px solid white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-}
-
-.user-name {
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-align: center;
-  color: white;
-}
-
-.logout-btn {
-  padding: 10px 20px;
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px solid white;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
 h1 {
   margin-bottom: 30px;
   font-size: 3rem;
@@ -250,17 +132,5 @@ h1 {
   color: white;
   font-size: 1.2rem;
   margin-top: 30px;
-}
-
-@media (max-width: 900px) {
-  .logo {
-    width: 20%;
-  }
-}
-
-@media (max-width: 600px) {
-  .logo {
-    width: 30%;
-  }
 }
 </style>
