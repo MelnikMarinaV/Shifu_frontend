@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import AudioTask from "../components/AudioTask.vue";
 import CardTask from "../components/CardTask.vue";
 import api from "@/api/http";
+import AppHeader from "@/components/AppHeader.vue";
 
 const route = useRoute();
 const items = ref([]);
@@ -26,6 +27,10 @@ onMounted(async () => {
 
 <template>
   <div class="lesson-wrapper">
+    <AppHeader
+      :logoTo="{ name: 'lessons' }"
+      :clickableNameTo="{ name: 'my-submissions' }"
+    />
     <div class="heading">
       <h1>{{ title }}</h1>
     </div>

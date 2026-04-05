@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import api from "@/api/http";
+import AppHeader from "@/components/AppHeader.vue";
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -58,38 +59,7 @@ onMounted(async () => {
 
 <template>
   <div class="submissions-container">
-    <div class="topnav">
-      <RouterLink :to="{ name: 'lessons' }">
-        <img class="logo" src="../pictures/logo-no-background.png" alt="" />
-      </RouterLink>
-
-      <div class="user-info">
-        <div class="user-details" v-if="auth.user">
-          <div
-            class="avatar-container"
-            @click="handleAvatarClick"
-            :class="{ uploading: uploading }"
-          >
-            <img
-              v-if="userAvatar && !imageError && !uploading"
-              class="user-avatar"
-              :src="userAvatar"
-              :alt="auth.user.username"
-              @error="handleImageError"
-            />
-            <div v-else class="avatar-fallback">
-              <span v-if="!uploading">{{ userInitials }}</span>
-              <span v-else class="upload-spinner">...</span>
-            </div>
-          </div>
-          <span class="user-name">{{ auth.user.username }}</span>
-        </div>
-
-        <button type="button" class="logout-btn" @click="handleLogout">
-          Выйти
-        </button>
-      </div>
-    </div>
+    <AppHeader :logoTo="{ name: 'lessons' }" />
 
     <h1>Мои записи</h1>
 

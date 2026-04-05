@@ -1,17 +1,25 @@
 <script setup>
-import { RouterLink, useRouter } from "vue-router"; //навигация по урокам
-import { ref, onMounted, computed } from "vue";
+import { computed, ref } from "vue";
+import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import api from "@/api/http";
-import AppHeader from "@/components/AppHeader.vue";
 
-const courses = ref([]);
-const lessons = ref([]);
+const props = defineProps({
+  logoTo: {
+    type: Object,
+    default: () => ({ name: "lessons" }),
+  },
+  clickableNameTo: {
+    type: Object,
+    default: null,
+  },
+});
 
-const handleLogout = () => {
-  auth.logout();
-  router.push({ name: "login" });
-};
+const auth = useAuthStore();
+const router = useRouter();
+
+const imageError = ref(false);
+const fileInput = ref(null);
+const uploading = ref(false);
 
 const getUserAvatar = (user) => {
   const avatar =
@@ -31,12 +39,24 @@ const getUserAvatar = (user) => {
 };
 
 const userAvatar = computed(() => getUserAvatar(auth.user));
+
 const userInitials = computed(() => {
   return auth.user?.username?.charAt(0).toUpperCase() || "U";
 });
 
 const handleImageError = () => {
   imageError.value = true;
+};
+
+const handleLogout = async () => {
+  auth.logout();
+  await router.replace({ name: "login" });
+};
+
+const goByName = async () => {
+  if (props.clickableNameTo) {
+    await router.push(props.clickableNameTo);
+  }
 };
 
 const handleAvatarClick = () => {
@@ -47,13 +67,11 @@ const handleFileChange = async (event) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
-  // Validate file type
   if (!file.type.startsWith("image/")) {
     alert("Пожалуйста, выберите изображение");
     return;
   }
 
-  // Validate file size (e.g., max 5MB)
   if (file.size > 5 * 1024 * 1024) {
     alert("Размер файла не должен превышать 5MB");
     return;
@@ -64,7 +82,7 @@ const handleFileChange = async (event) => {
 
   try {
     await auth.updateProfilePicture(file);
-    // Reset file input
+
     if (fileInput.value) {
       fileInput.value.value = "";
     }
@@ -75,62 +93,59 @@ const handleFileChange = async (event) => {
     uploading.value = false;
   }
 };
-
-onMounted(async () => {
-  try {
-    const courseResponse = await api.get("/api/courses/");
-    courses.value = courseResponse.data.courses;
-
-    if (courses.value.length > 0) {
-      const courseId = courses.value[0].id;
-      const lessonsResponse = await api.get(`/api/lessons/${courseId}/`);
-      lessons.value = lessonsResponse.data.lessons;
-    }
-  } catch (error) {
-    console.error("Error fetching items", error);
-  }
-});
 </script>
 
 <template>
-  <body>
-    <div class="lessons-container">
-      <AppHeader
-        :logoTo="{ name: 'lessons' }"
-        :clickableNameTo="{ name: 'my-submissions' }"
-      />
-      <!-- Отображает заголовок h1 для каждого курса из массива courses: на данный момент-1 курс HSK-1 -->
-      <h1 v-for="course in courses" :key="course.id">
-        {{ course.title }}
-      </h1>
-      <div class="lessons">
-        <ol v-if="lessons.length">
-          <li v-for="lesson in lessons" :key="lesson.id">
-            <!-- Создает ссылку на страницу урока с использованием RouterLink.  Атрибут :to  динамически формирует URL  на основе ID  урока -->
-            <RouterLink :to="`/lesson/${lesson.id}`" class="router-link">{{
-              lesson.title
-            }}</RouterLink>
-          </li>
-        </ol>
+  <div class="topnav">
+    <RouterLink :to="logoTo">
+      <img class="logo" src="../pictures/logo-no-background.png" alt="" />
+    </RouterLink>
+
+    <div class="user-info">
+      <div class="user-details" v-if="auth.user">
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/*"
+          style="display: none"
+          @change="handleFileChange"
+        />
+
+        <div
+          class="avatar-container"
+          @click="handleAvatarClick"
+          :class="{ uploading: uploading }"
+        >
+          <img
+            v-if="userAvatar && !imageError && !uploading"
+            class="user-avatar"
+            :src="userAvatar"
+            :alt="auth.user.username"
+            @error="handleImageError"
+          />
+          <div v-else class="avatar-fallback">
+            <span v-if="!uploading">{{ userInitials }}</span>
+            <span v-else class="upload-spinner">...</span>
+          </div>
+        </div>
+
+        <span
+          class="user-name"
+          :class="{ clickable: !!clickableNameTo }"
+          @click="goByName"
+        >
+          {{ auth.user.username }}
+        </span>
       </div>
+
+      <button type="button" class="logout-btn" @click="handleLogout">
+        Выйти
+      </button>
     </div>
-  </body>
+  </div>
 </template>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-}
-.lessons-container {
-  min-height: 100vh;
-  margin: 0;
-  background: #cd071e;
-  text-align: center;
-  padding-bottom: 50px;
-}
 .topnav {
   padding: 5vh;
   text-align: left;
@@ -138,14 +153,17 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
 }
+
 .logo {
   width: 10%;
 }
+
 .user-info {
   display: flex;
   align-items: center;
   gap: 20px;
 }
+
 .user-details {
   display: flex;
   flex-direction: column;
@@ -153,14 +171,17 @@ onMounted(async () => {
   gap: 8px;
   color: white;
 }
+
 .avatar-container {
   position: relative;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
+
 .avatar-container:hover {
   transform: scale(1.1);
 }
+
 .avatar-container:hover::after {
   content: "📷";
   position: absolute;
@@ -176,10 +197,12 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
 }
+
 .avatar-container.uploading {
   opacity: 0.7;
   cursor: wait;
 }
+
 .user-avatar {
   width: 50px;
   height: 50px;
@@ -189,6 +212,7 @@ onMounted(async () => {
   background-color: rgba(255, 255, 255, 0.2);
   display: block;
 }
+
 .avatar-fallback {
   width: 50px;
   height: 50px;
@@ -206,17 +230,11 @@ onMounted(async () => {
   font-weight: bold;
   color: white;
 }
-.clickable-name {
-  cursor: pointer;
-  text-decoration: underline;
-}
 
-.clickable-name:hover {
-  opacity: 0.8;
-}
 .upload-spinner {
   animation: pulse 1s infinite;
 }
+
 @keyframes pulse {
   0%,
   100% {
@@ -226,15 +244,23 @@ onMounted(async () => {
     opacity: 0.5;
   }
 }
+
 .user-name {
   font-weight: bold;
   font-size: 1.1rem;
   text-align: center;
+  color: white;
 }
-.user-email {
-  font-size: 0.9rem;
-  opacity: 0.9;
+
+.user-name.clickable {
+  cursor: pointer;
+  text-decoration: underline;
 }
+
+.user-name.clickable:hover {
+  opacity: 0.8;
+}
+
 .logout-btn {
   padding: 10px 20px;
   background-color: rgba(255, 255, 255, 0.2);
@@ -245,76 +271,12 @@ onMounted(async () => {
   font-size: 1rem;
   transition: all 0.3s ease;
 }
+
 .logout-btn:hover {
   background-color: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
 
-h1 {
-  margin-bottom: 20px;
-  font-size: 3rem;
-  font-weight: 700;
-  letter-spacing: 0.5rem;
-  font-family: "Times New Roman", Times, serif;
-  background: rgb(221, 229, 142);
-  background: linear-gradient(
-    0deg,
-    rgba(221, 229, 142, 1) 0%,
-    rgba(224, 229, 177, 1) 21%,
-    rgba(182, 181, 48, 0.8716620437237395) 100%
-  );
-  background-clip: text;
-  color: transparent;
-}
-
-.lessons {
-  margin: auto;
-  width: 70%;
-  height: 80%;
-}
-
-ol {
-  counter-reset: section;
-  list-style-type: "HSK1 - ";
-  list-style-position: inside;
-  width: 100%;
-  margin: 0 auto;
-  color: #cd071e;
-  text-align: center;
-  font-size: 20px;
-}
-
-li::before {
-  counter-increment: section;
-  content: counters(section, ".") " ";
-  color: #cd071e;
-}
-
-li {
-  background: rgb(209, 131, 117);
-  background: radial-gradient(
-    circle,
-    rgba(209, 131, 117, 0.8744631641719187) 0%,
-    rgba(235, 237, 210, 0.7232026599702381) 50%
-  );
-  width: 100%;
-  border: 1px solid #cd071e;
-  border-radius: 25px;
-  margin-bottom: 5px;
-  padding: 10px 0 0 0;
-}
-
-li:hover {
-  background-color: gold;
-}
-
-.router-link {
-  display: block;
-  text-decoration: none;
-  color: #cd071e;
-  padding: 20px;
-  font-size: 30px;
-}
 @media (max-width: 900px) {
   .logo {
     width: 20%;
