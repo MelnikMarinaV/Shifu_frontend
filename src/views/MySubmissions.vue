@@ -6,8 +6,9 @@ import AppHeader from "@/components/AppHeader.vue";
 const submissions = ref([]);
 const loading = ref(true);
 const error = ref("");
+const checkingId = ref(null);
 
-onMounted(async () => {
+const fetchSubmissions = async () => {
   try {
     const response = await api.get("/api/my-submissions/");
     submissions.value = response.data.submissions;
@@ -17,7 +18,22 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
-});
+};
+
+const checkSubmission = async (submissionId) => {
+  try {
+    checkingId.value = submissionId;
+    await api.post(`/api/submissions/${submissionId}/check-ai/`);
+    await fetchSubmissions();
+  } catch (e) {
+    console.error("AI check error", e);
+    alert("Не удалось выполнить ИИ-проверку.");
+  } finally {
+    checkingId.value = null;
+  }
+};
+
+onMounted(fetchSubmissions);
 </script>
 
 <template>
@@ -53,6 +69,29 @@ onMounted(async () => {
           :src="`http://127.0.0.1:8000${submission.result_file}`"
           class="audio-player"
         ></audio>
+        <button
+          @click="checkSubmission(submission.id)"
+          class="check-btn"
+          :disabled="checkingId === submission.id"
+        >
+          {{ checkingId === submission.id ? "Проверка..." : "Проверить ИИ" }}
+        </button>
+
+        <p v-if="submission.ai_status" class="submission-status">
+          Статус: {{ submission.ai_status }}
+        </p>
+
+        <p v-if="submission.transcript" class="submission-transcript">
+          Расшифровка: {{ submission.transcript }}
+        </p>
+
+        <p v-if="submission.ai_score !== null" class="submission-score">
+          Оценка: {{ submission.ai_score }}/100
+        </p>
+
+        <p v-if="submission.ai_feedback" class="submission-feedback">
+          Проверка ИИ: {{ submission.ai_feedback }}
+        </p>
 
         <p class="submission-date">
           Загружено: {{ new Date(submission.created_at).toLocaleString() }}
@@ -117,7 +156,10 @@ h1 {
 .submission-lesson,
 .submission-task,
 .submission-comment,
-.submission-date {
+.submission-date .submission-status,
+.submission-transcript,
+.submission-score,
+.submission-feedback {
   margin-bottom: 10px;
   font-weight: bold;
 }
@@ -132,5 +174,26 @@ h1 {
   color: white;
   font-size: 1.2rem;
   margin-top: 30px;
+}
+.check-btn {
+  margin: 15px 0;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.85);
+  color: #cd071e;
+  border: 2px solid #cd071e;
+  transition: all 0.3s ease;
+}
+
+.check-btn:hover:not(:disabled) {
+  background-color: white;
+  transform: scale(1.03);
+}
+
+.check-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 </style>
