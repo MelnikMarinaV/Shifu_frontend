@@ -1,17 +1,26 @@
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 const auth = useAuthStore();
 const router = useRouter();
+
 const username = ref("");
 const password = ref("");
 const error = ref("");
+const isLoading = ref(false);
 
 const submit = async () => {
   error.value = "";
+
+  if (!username.value || !password.value) {
+    error.value = "Введите имя пользователя и пароль";
+    return;
+  }
+
   try {
+    isLoading.value = true;
     await auth.login({ username: username.value, password: password.value });
     router.push({ name: "lessons" });
   } catch (e) {
@@ -21,213 +30,400 @@ const submit = async () => {
       error.value = "Не удалось войти. Попробуйте ещё раз.";
       console.error(e);
     }
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
 
 <template>
-  <div class="login-wrapper">
-    <div class="topnav">
-      <img class="logo" src="../pictures/logo-no-background.png" alt="Shifu" />
-    </div>
+  <div class="auth-page">
+    <div class="auth-shell">
+      <!-- Левая часть -->
+      <div class="auth-visual">
+        <RouterLink :to="{ name: 'login' }" class="brand">
+          <img
+            class="brand-logo"
+            src="../pictures/logo-no-background.png"
+            alt="Shifu"
+          />
 
-    <div class="login-container">
-      <h1>SHIFU</h1>
-      <p class="subtitle">Вход в личный кабинет</p>
+          <div class="brand-text">
+            <h2 class="brand-title">SHIFU</h2>
+            <p class="brand-subtitle">Твой путь к китайскому языку</p>
+          </div>
+        </RouterLink>
 
-      <form class="login-form" @submit.prevent="submit">
-        <input
-          v-model="username"
-          type="text"
-          placeholder="Имя пользователя"
-          autocomplete="username"
-        />
+        <div class="visual-content">
+          <h1 class="visual-title">С возвращением</h1>
 
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Пароль"
-          autocomplete="current-password"
-        />
+          <p class="visual-description">
+            Продолжайте изучать китайский язык, проходить уроки, практиковать
+            аудирование и открывать новые слова.
+          </p>
+        </div>
+      </div>
 
-        <button type="submit">Войти</button>
-        <p class="register-link">
-          Нет аккаунта?
-          <RouterLink :to="{ name: 'register' }">Зарегистрироваться</RouterLink>
-        </p>
+      <!-- Правая часть -->
+      <div class="auth-form-side">
+        <div class="form-box">
+          <div class="form-header">
+            <h3>Авторизация</h3>
+            <p>Войдите в личный кабинет, чтобы продолжить обучение</p>
+          </div>
 
-        <p v-if="error" class="error-message">
-          {{ error }}
-        </p>
-      </form>
+          <form class="login-form" @submit.prevent="submit">
+            <div class="field">
+              <label for="username">Имя пользователя</label>
+              <input
+                id="username"
+                v-model="username"
+                type="text"
+                placeholder="Введите имя пользователя"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="field">
+              <label for="password">Пароль</label>
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                placeholder="Введите пароль"
+                autocomplete="current-password"
+              />
+            </div>
+
+            <p v-if="error" class="error-message">
+              {{ error }}
+            </p>
+
+            <button type="submit" :disabled="isLoading" class="submit-btn">
+              {{ isLoading ? "Вход..." : "Войти" }}
+            </button>
+
+            <p class="register-link">
+              Нет аккаунта?
+              <RouterLink :to="{ name: 'register' }">
+                Зарегистрироваться
+              </RouterLink>
+            </p>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 * {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
   box-sizing: border-box;
 }
 
-.login-wrapper {
+.auth-page {
   min-height: 100vh;
-  background: #cd071e;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(223, 164, 147, 0.18),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(186, 199, 182, 0.18),
+      transparent 30%
+    ),
+    linear-gradient(180deg, #f7f3ee 0%, #f2eee8 100%);
+}
+
+.auth-shell {
+  width: 100%;
+  max-width: 1180px;
+  min-height: 720px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(120, 96, 80, 0.1);
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(83, 61, 47, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.auth-visual {
+  position: relative;
+  padding: 36px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  background:
+    linear-gradient(rgba(248, 244, 239, 0.72), rgba(248, 244, 239, 0.78)),
+    url("../pictures/login-background.png") right center/cover no-repeat;
 }
 
-.topnav {
-  padding: 5vh;
-  text-align: left;
+.auth-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(217, 104, 79, 0.16),
+      transparent 12%
+    ),
+    radial-gradient(
+      circle at 70% 75%,
+      rgba(125, 155, 127, 0.14),
+      transparent 18%
+    );
+  pointer-events: none;
 }
 
-.logo {
-  width: 10%;
+.brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: #2d2a26;
+  width: fit-content;
 }
 
-.login-container {
-  margin: auto;
-  width: 40%;
-  min-width: 320px;
-  max-width: 500px;
-  background: radial-gradient(
-    circle,
-    rgba(209, 131, 117, 0.8744631641719187) 0%,
-    rgba(235, 237, 210, 0.7232026599702381) 50%
-  );
-  border: 1px solid #cd071e;
-  border-radius: 25px;
-  padding: 40px 30px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+.brand-logo {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
 }
 
-h1 {
-  margin-bottom: 15px;
-  font-size: 3rem;
+.brand-title {
+  margin: 0;
+  font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: 0.5rem;
-  font-family: "Times New Roman", Times, serif;
-  background: linear-gradient(
-    0deg,
-    rgba(221, 229, 142, 1) 0%,
-    rgba(224, 229, 177, 1) 21%,
-    rgba(182, 181, 48, 0.8716620437237395) 100%
-  );
-  background-clip: text;
+  letter-spacing: 0.25em;
+
+  background: linear-gradient(180deg, #b05e43, #f6f5f5);
+  -webkit-background-clip: text;
   color: transparent;
 }
 
-.subtitle {
-  margin-bottom: 30px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  background: linear-gradient(
-    0deg,
-    rgba(221, 229, 142, 1) 0%,
-    rgb(221, 27, 27) 21%,
-    rgba(226, 226, 69, 0.775) 100%
-  );
-  background-clip: text;
+.brand-subtitle {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #7c726b;
+  letter-spacing: 0.03em;
+}
+
+.brand-text h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+
+.brand-text p {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  color: #6c625a;
+}
+
+.visual-content {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+}
+
+.visual-content h1 {
+  margin: 0 0 14px;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  background: linear-gradient(180deg, #b05e43, #f6f5f5);
+  -webkit-background-clip: text;
   color: transparent;
 }
 
-.login-form {
+.visual-content p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #5f5650;
+}
+
+.auth-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.form-box {
+  width: 100%;
+  max-width: 430px;
+}
+
+.form-header {
+  margin-bottom: 28px;
+}
+
+.form-header h3 {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  color: #2d2723;
+}
+
+.form-header p {
+  margin: 0;
+  color: #7c726b;
+  font-size: 1rem;
+}
+
+.register-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.login-form input {
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #544b44;
+}
+
+.field input {
   width: 100%;
-  padding: 16px 18px;
-  border-radius: 15px;
-  font-size: 1.1rem;
-  background: rgba(255, 255, 255, 0.85);
-  color: #cd071e;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.login-form input:focus {
-  border: 2px solid #cd071e;
-  background: rgba(255, 255, 255, 1);
-}
-
-.login-form input::placeholder {
-  color: rgba(205, 7, 30, 0.7);
-}
-
-.login-form button {
-  padding: 15px 20px;
-  background-color: rgba(205, 7, 30, 0.85);
-  color: white;
-  border: 2px solid white;
-  border-radius: 15px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.login-form button:hover {
-  background-color: rgba(205, 7, 30, 1);
-  transform: scale(1.03);
-}
-
-.register-link {
-  margin-top: 10px;
+  height: 54px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid #e7ddd4;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2f2a26;
   font-size: 1rem;
-  color: white;
+  transition: 0.25s ease;
 }
 
-.register-link a {
-  color: #f3f1a0;
-  font-weight: bold;
-  text-decoration: underline;
+.field input::placeholder {
+  color: #a59a92;
+}
+
+.field input:focus {
+  border-color: #cf5d4c;
+  box-shadow: 0 0 0 4px rgba(207, 93, 76, 0.12);
+  background: #fff;
+}
+
+.submit-btn {
+  margin-top: 20px;
+  height: 54px;
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  background: #c84d3e;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s ease;
+  box-shadow: 0 10px 24px rgba(200, 77, 62, 0.22);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #b74234;
+  transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .error-message {
-  font-size: 1rem;
-  font-weight: bold;
-  color: white;
-  background: rgba(205, 7, 30, 0.75);
-  padding: 12px;
-  border-radius: 12px;
-  margin-top: 5px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fff1ef;
+  border: 1px solid #f0c8c2;
+  color: #b34033;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
-@media (max-width: 900px) {
-  .login-container {
-    width: 70%;
+.register-link {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 0.98rem;
+  color: #6a6059;
+}
+
+.register-link a {
+  color: #c84d3e;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 980px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 
-  .logo {
-    width: 20%;
+  .auth-visual {
+    min-height: 280px;
+    padding: 28px;
+  }
+
+  .visual-content h1 {
+    font-size: 2rem;
+  }
+
+  .auth-form-side {
+    padding: 28px;
   }
 }
 
-@media (max-width: 600px) {
-  .login-container {
-    width: 88%;
-    padding: 30px 20px;
+@media (max-width: 640px) {
+  .auth-page {
+    padding: 16px;
   }
 
-  h1 {
-    font-size: 2.2rem;
-    letter-spacing: 0.25rem;
+  .auth-shell {
+    border-radius: 24px;
   }
 
-  .subtitle {
-    font-size: 1rem;
+  .auth-visual,
+  .auth-form-side {
+    padding: 20px;
   }
 
-  .logo {
-    width: 30%;
+  .brand-logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .visual-content h1 {
+    font-size: 1.7rem;
+  }
+
+  .form-header h3 {
+    font-size: 1.6rem;
+  }
+
+  .field input,
+  .submit-btn {
+    height: 50px;
   }
 }
 </style>
