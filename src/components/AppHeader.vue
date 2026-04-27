@@ -96,18 +96,31 @@ const handleFileChange = async (event) => {
 </script>
 
 <template>
-  <div class="topnav">
-    <RouterLink :to="logoTo">
-      <img class="logo" src="../pictures/logo-no-background.png" alt="" />
-    </RouterLink>
+  <header class="app-header">
+    <div class="header-left">
+      <RouterLink :to="logoTo" class="brand-link">
+        <div class="logo-shell">
+          <img
+            class="logo"
+            src="../pictures/logo-no-background.png"
+            alt="Shifu"
+          />
+        </div>
 
-    <div class="user-info">
-      <div class="user-details" v-if="auth.user">
+        <div class="brand-text">
+          <h2>SHIFU</h2>
+          <p>Твой путь к китайскому языку</p>
+        </div>
+      </RouterLink>
+    </div>
+
+    <div class="header-right">
+      <div v-if="auth.user" class="user-panel">
         <input
           ref="fileInput"
           type="file"
           accept="image/*"
-          style="display: none"
+          class="hidden-file-input"
           @change="handleFileChange"
         />
 
@@ -115,6 +128,7 @@ const handleFileChange = async (event) => {
           class="avatar-container"
           @click="handleAvatarClick"
           :class="{ uploading: uploading }"
+          title="Изменить аватар"
         >
           <img
             v-if="userAvatar && !imageError && !uploading"
@@ -127,75 +141,125 @@ const handleFileChange = async (event) => {
             <span v-if="!uploading">{{ userInitials }}</span>
             <span v-else class="upload-spinner">...</span>
           </div>
+
+          <div class="avatar-overlay">📷</div>
         </div>
 
-        <span
-          class="user-name"
-          :class="{ clickable: !!clickableNameTo }"
-          @click="goByName"
-        >
-          {{ auth.user.username }}
-        </span>
-      </div>
+        <div class="user-meta">
+          <span class="welcome-text">Добро пожаловать!</span>
+          <span
+            class="user-name"
+            :class="{ clickable: !!clickableNameTo }"
+            @click="goByName"
+          >
+            {{ auth.user.username }}
+          </span>
+        </div>
 
-      <button type="button" class="logout-btn" @click="handleLogout">
-        Выйти
-      </button>
+        <button type="button" class="logout-btn" @click="handleLogout">
+          Выйти
+        </button>
+      </div>
     </div>
-  </div>
+  </header>
 </template>
 
 <style scoped>
-.topnav {
-  padding: 5vh;
-  text-align: left;
+* {
+  box-sizing: border-box;
+}
+
+.app-header {
+  width: 100%;
+  padding: 18px 24px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(120, 96, 80, 0.08);
+  border-radius: 28px;
+  box-shadow: 0 16px 40px rgba(83, 61, 47, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.header-left {
+  min-width: 0;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+}
+
+.logo-shell {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
 }
 
 .logo {
-  width: 10%;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.brand-text h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  background: linear-gradient(180deg, #b05e43, #6c625a);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-.user-details {
+.brand-text p {
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+  color: #7c726b;
+}
+
+.header-right {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  color: white;
+  justify-content: flex-end;
+}
+
+.user-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 999px;
+  background: #fffaf7;
+  border: 1px solid #efe2d8;
+}
+
+.hidden-file-input {
+  display: none;
 }
 
 .avatar-container {
   position: relative;
+  width: 52px;
+  height: 52px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .avatar-container:hover {
-  transform: scale(1.1);
-}
-
-.avatar-container:hover::after {
-  content: "📷";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.5rem;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transform: scale(1.04);
 }
 
 .avatar-container.uploading {
@@ -203,32 +267,46 @@ const handleFileChange = async (event) => {
   cursor: wait;
 }
 
-.user-avatar {
-  width: 50px;
-  height: 50px;
+.user-avatar,
+.avatar-fallback {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.user-avatar {
   object-fit: cover;
-  border: 2px solid white;
-  background-color: rgba(255, 255, 255, 0.2);
   display: block;
 }
 
 .avatar-fallback {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.1)
-  );
-  border: 2px solid white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+  background: #c84d3e;
   color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(45, 39, 35, 0.38);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.avatar-container:hover .avatar-overlay {
+  opacity: 1;
 }
 
 .upload-spinner {
@@ -241,51 +319,96 @@ const handleFileChange = async (event) => {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.45;
   }
 }
 
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+.welcome-text {
+  font-size: 0.78rem;
+  color: #9a8d84;
+}
+
 .user-name {
-  font-weight: bold;
-  font-size: 1.1rem;
-  text-align: center;
-  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d2723;
+  transition: 0.2s ease;
 }
 
 .user-name.clickable {
   cursor: pointer;
-  text-decoration: underline;
 }
 
 .user-name.clickable:hover {
-  opacity: 0.8;
+  color: #c84d3e;
 }
 
 .logout-btn {
-  padding: 10px 20px;
-  background-color: rgba(255, 255, 255, 0.2);
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: #c84d3e;
   color: white;
-  border: 2px solid white;
-  border-radius: 5px;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: 0.25s ease;
+  box-shadow: 0 10px 24px rgba(200, 77, 62, 0.18);
 }
 
 .logout-btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  background: #b74234;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 900px) {
-  .logo {
-    width: 20%;
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .user-panel {
+    width: 100%;
+    border-radius: 24px;
+    justify-content: space-between;
   }
 }
 
-@media (max-width: 600px) {
-  .logo {
-    width: 30%;
+@media (max-width: 640px) {
+  .brand-text h2 {
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+  }
+
+  .brand-text p {
+    font-size: 0.82rem;
+  }
+
+  .user-panel {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .user-meta {
+    min-width: auto;
+  }
+
+  .logout-btn {
+    width: 100%;
   }
 }
 </style>
