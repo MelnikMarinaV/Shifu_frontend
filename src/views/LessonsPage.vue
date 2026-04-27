@@ -4,34 +4,33 @@ import { ref, onMounted, computed } from "vue";
 import api from "@/api/http";
 import AppHeader from "@/components/AppHeader.vue";
 import SideBar from "@/components/SideBar.vue";
+import img1 from "@/pictures/lessons/lesson1.jpeg";
+import img2 from "@/pictures/lessons/lesson2.jpeg";
+import img3 from "@/pictures/lessons/lesson3.jpeg";
+import img4 from "@/pictures/lessons/lesson4.jpeg";
 
 const courses = ref([]);
 const lessons = ref([]);
 const loading = ref(true);
 const error = ref("");
-
 const searchQuery = ref("");
-const selectedLevel = ref("all");
 
-const lessonImages = ["🎋", "🏮", "🖌️", "🍵", "🪭", "🏯", "🐼", "🌸"];
+const lessonImages = [img1, img2, img3, img4];
 
 const getLessonIcon = (index) => {
   return lessonImages[index % lessonImages.length];
 };
 
 const filteredLessons = computed(() => {
-  return lessons.value.filter((lesson) => {
-    const matchesSearch = lesson.title
-      .toLowerCase()
-      .includes(searchQuery.value.toLowerCase());
-
-    return matchesSearch;
-  });
+  return lessons.value.filter((lesson) =>
+    lesson.title.toLowerCase().includes(searchQuery.value.toLowerCase()),
+  );
 });
 
 onMounted(async () => {
   try {
     loading.value = true;
+    error.value = "";
 
     const courseResponse = await api.get("/api/courses/");
     courses.value = courseResponse.data.courses || [];
@@ -84,12 +83,6 @@ onMounted(async () => {
             placeholder="Поиск уроков..."
           />
         </div>
-
-        <select v-model="selectedLevel">
-          <option value="all">Все уровни</option>
-          <option value="hsk1">HSK 1</option>
-          <option value="hsk2">HSK 2</option>
-        </select>
       </section>
 
       <section v-if="loading" class="state-card">Загрузка уроков...</section>
@@ -111,7 +104,7 @@ onMounted(async () => {
         >
           <div class="lesson-top">
             <div class="lesson-image">
-              {{ getLessonIcon(index) }}
+              <img :src="getLessonIcon(index)" alt="lesson" />
             </div>
 
             <div class="lesson-info">
@@ -147,8 +140,6 @@ onMounted(async () => {
           <strong>Учитесь регулярно и не забывайте повторять материал.</strong>
           <p>Удачи в изучении!</p>
         </div>
-
-        <button>🏆 Мои достижения</button>
       </section>
     </main>
   </div>
@@ -237,12 +228,10 @@ onMounted(async () => {
 
 .filters {
   margin: 28px 0 24px;
-  display: grid;
-  grid-template-columns: 1fr 240px;
-  gap: 18px;
 }
 
 .search-box {
+  width: 100%;
   height: 58px;
   padding: 0 18px;
   border-radius: 18px;
@@ -264,17 +253,6 @@ onMounted(async () => {
 
 .search-box input::placeholder {
   color: #a59a92;
-}
-
-.filters select {
-  height: 58px;
-  padding: 0 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid #e7ddd4;
-  color: #2f2a26;
-  font-size: 1rem;
-  outline: none;
 }
 
 .lessons-grid {
@@ -311,12 +289,14 @@ onMounted(async () => {
   width: 86px;
   height: 86px;
   border-radius: 50%;
+  overflow: hidden;
   background: #f3eadc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  flex-shrink: 0;
+}
+
+.lesson-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .lesson-info h3 {
