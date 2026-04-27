@@ -48,6 +48,22 @@ export const useAuthStore = defineStore("auth", {
       this.user = data;
       return data;
     },
+    async updateProfile({ username, email, avatar }) {
+      const formData = new FormData();
+
+      if (username) formData.append("username", username);
+      if (email) formData.append("email", email);
+      if (avatar) formData.append("avatar", avatar);
+
+      const { data } = await api.patch("/api/auth/me/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      this.user = data;
+      return data;
+    },
 
     async refreshTokens() {
       if (!this.refreshToken) throw new Error("No refresh token");

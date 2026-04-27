@@ -5,9 +5,19 @@ const route = useRoute();
 
 const menuItems = [
   { label: "Главная", icon: "🏠", to: { name: "lessons" } },
-  { label: "Уроки", icon: "📖", to: { name: "lessons" } },
-  { label: "Записи", icon: "📝", to: { name: "my-submissions" } },
-  { label: "Настройки", icon: "⚙️", to: { name: "lessons" } },
+  {
+    label: "Уроки",
+    icon: "📖",
+    to: { name: "lessons-page" },
+    activeOn: "lessons-page",
+  },
+  { label: "Записи", icon: "🎤", to: { name: "my-submissions" } },
+  {
+    label: "Настройки",
+    icon: "⚙️",
+    to: { name: "settings" },
+    activeOn: "settings",
+  },
 ];
 
 const isActive = (item) => route.name === item.to.name;

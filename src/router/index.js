@@ -35,6 +35,18 @@ const routes = [
     component: MySubmissions,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/settings",
+    name: "settings",
+    component: () => import("../views/Settings.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/lessons-page",
+    name: "lessons-page",
+    component: () => import("../views/LessonsPage.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({
