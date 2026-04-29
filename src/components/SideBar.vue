@@ -11,7 +11,12 @@ const menuItems = [
     to: { name: "lessons-page" },
     activeOn: "lessons-page",
   },
-  { label: "Записи", icon: "🎤", to: { name: "my-submissions" } },
+  {
+    label: "Записи",
+    icon: "📝",
+    to: { name: "my-submissions" },
+    activeOn: "my-submissions",
+  },
   {
     label: "Настройки",
     icon: "⚙️",
