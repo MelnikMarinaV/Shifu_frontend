@@ -1,10 +1,21 @@
 <script setup>
+import { ref } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
 const route = useRoute();
+const isOpen = ref(false);
+
+const closeSidebar = () => {
+  isOpen.value = false;
+};
 
 const menuItems = [
-  { label: "Главная", icon: "🏠", to: { name: "lessons" } },
+  {
+    label: "Главная",
+    icon: "🏠",
+    to: { name: "lessons" },
+    activeOn: "lessons",
+  },
   {
     label: "Уроки",
     icon: "📖",
@@ -25,13 +36,18 @@ const menuItems = [
   },
 ];
 
-const isActive = (item) => route.name === item.to.name;
+const isActive = (item) => route.name === item.activeOn;
 </script>
 
 <template>
-  <aside class="sidebar">
+  <button class="burger-btn" type="button" @click="isOpen = true">☰</button>
+
+  <div v-if="isOpen" class="mobile-overlay" @click="closeSidebar"></div>
+
+  <aside class="sidebar" :class="{ open: isOpen }">
+    <button class="close-btn" type="button" @click="closeSidebar">×</button>
     <div class="sidebar-top">
-      <RouterLink :to="{ name: 'lessons' }" class="brand">
+      <RouterLink :to="{ name: 'lessons' }" class="brand" @click="closeSidebar">
         <div class="brand-logo-wrap">
           <img
             class="brand-logo"
@@ -53,6 +69,7 @@ const isActive = (item) => route.name === item.to.name;
           :to="item.to"
           class="menu-item"
           :class="{ active: isActive(item) }"
+          @click="closeSidebar"
         >
           <span class="menu-icon">{{ item.icon }}</span>
           <span class="menu-label">{{ item.label }}</span>
@@ -212,13 +229,91 @@ const isActive = (item) => route.name === item.to.name;
   flex-shrink: 0;
 }
 
+.burger-btn,
+.close-btn {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .burger-btn {
+    display: flex;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 1001;
+
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    border: 1px solid #efe2d8;
+    background: rgba(255, 255, 255, 0.88);
+    color: #c84d3e;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.5rem;
+    font-weight: 800;
+    cursor: pointer;
+
+    box-shadow: 0 12px 28px rgba(83, 61, 47, 0.12);
+    backdrop-filter: blur(10px);
+  }
+
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(45, 39, 35, 0.28);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1002;
+
+    width: 290px;
+    min-width: 290px;
+    height: 100vh;
+    min-height: 100vh;
+
+    transform: translateX(-110%);
+    transition: transform 0.25s ease;
+
+    border-right: 1px solid rgba(120, 96, 80, 0.08);
+    border-bottom: none;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .close-btn {
+    display: flex;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    background: #fff1ec;
+    color: #c84d3e;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+}
 @media (max-width: 980px) {
   .sidebar {
-    width: 100%;
-    min-width: 100%;
-    min-height: auto;
-    border-right: none;
-    border-bottom: 1px solid rgba(120, 96, 80, 0.08);
+    background: #fffaf7;
+    backdrop-filter: none;
+    overflow-y: auto;
   }
 }
 </style>
