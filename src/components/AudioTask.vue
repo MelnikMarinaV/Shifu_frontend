@@ -18,17 +18,18 @@ const props = defineProps({
 });
 
 const show = ref(false);
+const recording = ref(false);
+const uploading = ref(false);
+const uploaded = ref(false);
 
 let mediaRecorder = null;
 let mediaStream = null;
 const chunks = ref([]);
-const recording = ref(false);
 
 function showPinini() {
   show.value = !show.value;
 }
 
-// воспроизведение аудио диктора
 async function playAudio() {
   try {
     const response = await api.get(`/api/tasks/${props.task_id}/audio/`, {
@@ -50,7 +51,6 @@ async function playAudio() {
   }
 }
 
-// запись звука с микрофона пользователя
 const toggleRecording = async () => {
   if (recording.value) {
     mediaRecorder.stop();
@@ -60,9 +60,10 @@ const toggleRecording = async () => {
   }
 
   try {
+    uploaded.value = false;
     chunks.value = [];
-    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder = new MediaRecorder(mediaStream);
 
     mediaRecorder.ondataavailable = (e) => {
@@ -84,22 +85,21 @@ const toggleRecording = async () => {
       formData.append("audio", blob, `recording.${extension}`);
 
       try {
-        const response = await api.post(
-          `/api/tasks/${props.task_id}/upload-audio/`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          },
-        );
+        uploading.value = true;
 
-        console.log("Audio uploaded successfully", response.data);
+        await api.post(`/api/tasks/${props.task_id}/upload-audio/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        uploaded.value = true;
       } catch (error) {
         console.error("Error uploading audio", error);
         alert("Не удалось загрузить запись.");
       } finally {
         chunks.value = [];
+        uploading.value = false;
       }
     };
 
@@ -113,61 +113,228 @@ const toggleRecording = async () => {
 </script>
 
 <template>
-  <div class="task">
-    <button id="play_audio" @click="playAudio">
-      <img src="../pictures/play-button.png" alt="" />
-    </button>
+  <div class="audio-task">
+    <div class="task-main">
+      <button class="icon-btn play-btn" type="button" @click="playAudio">
+        ▶
+      </button>
 
-    <button id="show_pinini" @click="showPinini">
-      <img src="../pictures/show-button.png" alt="" />
-    </button>
+      <div class="phrase-block">
+        <p class="hanzi">{{ initial_text }}</p>
 
-    <p id="initial_text">{{ initial_text }}</p>
+        <transition name="fade">
+          <p v-if="show" class="pinini">
+            {{ pinini }}
+          </p>
+        </transition>
+      </div>
 
-    <button id="record_button" @click="toggleRecording">
-      <img src="../pictures/record-button.png" alt="" />
-    </button>
+      <button class="icon-btn show-btn" type="button" @click="showPinini">
+        {{ show ? "隐藏" : "拼" }}
+      </button>
 
-    <br />
-    <p v-show="show" id="pinini">{{ pinini }}</p>
+      <button
+        class="record-btn"
+        type="button"
+        :class="{ recording: recording }"
+        @click="toggleRecording"
+      >
+        <span class="record-dot"></span>
+        {{ recording ? "Остановить" : "Записать" }}
+      </button>
+    </div>
+
+    <div class="task-status">
+      <span v-if="recording" class="status recording-status">
+        Идёт запись...
+      </span>
+
+      <span v-else-if="uploading" class="status uploading-status">
+        Загрузка записи...
+      </span>
+
+      <span v-else-if="uploaded" class="status uploaded-status">
+        Запись отправлена
+      </span>
+
+      <span v-else class="status default-status">
+        Прослушайте фразу и повторите её своим голосом
+      </span>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.task {
-  display: inline-block;
-  text-align: center;
-  margin-bottom: 40px;
+* {
+  box-sizing: border-box;
 }
-#play_audio,
-#show_pinini,
-#record_button {
-  background: none;
+
+.audio-task {
+  width: 100%;
+  max-width: 760px;
+  padding: 20px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fffdfa 0%, #f8f4ef 100%);
+  border: 1px solid #efe2d8;
+  box-shadow: 0 12px 28px rgba(83, 61, 47, 0.05);
+}
+
+.task-main {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   border: none;
-  width: 30px;
-}
-#play_audio:hover,
-#show_pinini:hover,
-#record_button:hover {
-  opacity: 0.5;
-}
-
-#show_pinini {
-  margin-right: 10px;
+  background: #fff1ec;
+  color: #c84d3e;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.25s ease;
 }
 
-#initial_text {
-  font-size: 40px;
-  font-weight: bold;
-}
-button,
-p {
-  display: inline-block;
+.icon-btn:hover {
+  background: #c84d3e;
+  color: white;
+  transform: translateY(-1px);
 }
 
-#pinini {
-  font-size: 20px;
-  margin-top: 10px;
-  color: #cd071e;
+.phrase-block {
+  min-height: 74px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.hanzi {
+  margin: 0;
+  font-size: 2.6rem;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #2d2723;
+}
+
+.pinini {
+  margin: 8px 0 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #c84d3e;
+  font-weight: 700;
+}
+
+.record-btn {
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: none;
+  background: #c84d3e;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  transition: 0.25s ease;
+  box-shadow: 0 10px 24px rgba(200, 77, 62, 0.16);
+}
+
+.record-btn:hover {
+  background: #b74234;
+  transform: translateY(-1px);
+}
+
+.record-btn.recording {
+  background: #2d2723;
+}
+
+.record-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+}
+
+.recording .record-dot {
+  animation: pulse 1s infinite;
+}
+
+.task-status {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #efe2d8;
+  text-align: center;
+}
+
+.status {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.default-status {
+  color: #7c726b;
+}
+
+.recording-status {
+  color: #c84d3e;
+}
+
+.uploading-status {
+  color: #c89125;
+}
+
+.uploaded-status {
+  color: #4f8a55;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(1.35);
+  }
+}
+
+@media (max-width: 760px) {
+  .task-main {
+    grid-template-columns: 1fr;
+  }
+
+  .icon-btn,
+  .record-btn {
+    width: 100%;
+  }
+
+  .phrase-block {
+    order: -1;
+  }
+
+  .hanzi {
+    font-size: 2.2rem;
+  }
 }
 </style>
