@@ -15,6 +15,7 @@ const description = ref("");
 const title = ref("");
 const loading = ref(true);
 const error = ref("");
+const submissions = ref([]);
 
 const lessons = ref([]);
 
@@ -40,9 +41,15 @@ const previousLesson = computed(() => {
   return lessons.value[currentLessonIndex.value - 1] || null;
 });
 
+const completedTasks = computed(() => {
+  return items.value.filter((task) =>
+    submissions.value.some((submission) => submission.task === task.id),
+  ).length;
+});
+
 const progress = computed(() => {
   if (!items.value.length) return 0;
-  return Math.min(100, 50 + items.value.length * 6);
+  return Math.round((completedTasks.value / items.value.length) * 100);
 });
 
 const loadLessonsList = async () => {
@@ -75,6 +82,18 @@ const loadLesson = async () => {
   }
 };
 
+const loadSubmissions = async () => {
+  try {
+    const response = await api.get("/api/my-submissions/", {
+      params: { t: Date.now() },
+    });
+
+    submissions.value = response.data.submissions || [];
+  } catch (err) {
+    console.error("Error fetching submissions", err);
+  }
+};
+
 const goPrevious = () => {
   if (!previousLesson.value) return;
 
@@ -96,12 +115,14 @@ const goNext = () => {
 onMounted(async () => {
   await loadLessonsList();
   await loadLesson();
+  await loadSubmissions();
 });
 
 watch(
   () => route.params.id,
-  () => {
-    loadLesson();
+  async () => {
+    await loadLesson();
+    await loadSubmissions();
   },
 );
 </script>
@@ -131,7 +152,11 @@ watch(
         </div>
 
         <div class="progress-widget">
-          <span>Ваш прогресс</span>
+          <span>
+            Ваш прогресс<br />
+            <small>{{ completedTasks }} из {{ items.length }} заданий</small>
+          </span>
+
           <div class="progress-circle">{{ progress }}%</div>
         </div>
       </section>
@@ -307,6 +332,11 @@ watch(
   gap: 14px;
   color: #544b44;
   font-weight: 600;
+}
+
+.progress-widget small {
+  color: #7c726b;
+  font-weight: 500;
 }
 
 .progress-circle {

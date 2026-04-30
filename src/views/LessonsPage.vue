@@ -14,6 +14,7 @@ const lessons = ref([]);
 const loading = ref(true);
 const error = ref("");
 const searchQuery = ref("");
+const submissions = ref([]);
 
 const lessonImages = [img1, img2, img3, img4];
 
@@ -26,6 +27,18 @@ const filteredLessons = computed(() => {
     lesson.title.toLowerCase().includes(searchQuery.value.toLowerCase()),
   );
 });
+
+const getLessonProgress = (lesson) => {
+  const lessonTasks = lesson.tasks || [];
+
+  if (!lessonTasks.length) return 0;
+
+  const completedCount = lessonTasks.filter((task) =>
+    submissions.value.some((submission) => submission.task === task.id),
+  ).length;
+
+  return Math.round((completedCount / lessonTasks.length) * 100);
+};
 
 onMounted(async () => {
   try {
@@ -40,6 +53,12 @@ onMounted(async () => {
       const lessonsResponse = await api.get(`/api/lessons/${courseId}/`);
       lessons.value = lessonsResponse.data.lessons || [];
     }
+
+    const submissionsResponse = await api.get("/api/my-submissions/", {
+      params: { t: Date.now() },
+    });
+
+    submissions.value = submissionsResponse.data.submissions || [];
   } catch (err) {
     console.error("Error fetching lessons", err);
     error.value = "Не удалось загрузить уроки";
@@ -118,13 +137,13 @@ onMounted(async () => {
           <div class="lesson-progress">
             <div class="progress-head">
               <span>Прогресс</span>
-              <span>{{ index < 3 ? 80 - index * 20 : 0 }}%</span>
+              <span>{{ getLessonProgress(lesson) }}%</span>
             </div>
 
             <div class="progress-bar">
               <div
                 class="progress-fill"
-                :style="{ width: `${index < 3 ? 80 - index * 20 : 0}%` }"
+                :style="{ width: `${getLessonProgress(lesson)}%` }"
               ></div>
             </div>
           </div>
