@@ -16,12 +16,45 @@ const title = ref("");
 const loading = ref(true);
 const error = ref("");
 
-const lessonId = computed(() => Number(route.params.id));
+const lessons = ref([]);
+
+const currentLessonId = computed(() => Number(route.params.id));
+
+const currentLessonIndex = computed(() => {
+  return lessons.value.findIndex(
+    (lesson) => lesson.id === currentLessonId.value,
+  );
+});
+
+const lessonId = computed(() => {
+  return currentLessonIndex.value >= 0
+    ? currentLessonIndex.value + 1
+    : currentLessonId.value;
+});
+
+const nextLesson = computed(() => {
+  return lessons.value[currentLessonIndex.value + 1] || null;
+});
+
+const previousLesson = computed(() => {
+  return lessons.value[currentLessonIndex.value - 1] || null;
+});
 
 const progress = computed(() => {
   if (!items.value.length) return 0;
   return Math.min(100, 50 + items.value.length * 6);
 });
+
+const loadLessonsList = async () => {
+  const courseResponse = await api.get("/api/courses/");
+  const courses = courseResponse.data.courses || [];
+
+  if (!courses.length) return;
+
+  const courseId = courses[0].id;
+  const lessonsResponse = await api.get(`/api/lessons/${courseId}/`);
+  lessons.value = lessonsResponse.data.lessons || [];
+};
 
 const loadLesson = async () => {
   try {
@@ -42,18 +75,28 @@ const loadLesson = async () => {
   }
 };
 
-const goBack = () => {
-  router.push({ name: "lessons-page" });
-};
+const goPrevious = () => {
+  if (!previousLesson.value) return;
 
-const goNext = () => {
   router.push({
     name: "lesson-detail",
-    params: { id: lessonId.value + 1 },
+    params: { id: previousLesson.value.id },
   });
 };
 
-onMounted(loadLesson);
+const goNext = () => {
+  if (!nextLesson.value) return;
+
+  router.push({
+    name: "lesson-detail",
+    params: { id: nextLesson.value.id },
+  });
+};
+
+onMounted(async () => {
+  await loadLessonsList();
+  await loadLesson();
+});
 
 watch(
   () => route.params.id,
@@ -170,8 +213,21 @@ watch(
         </section>
 
         <div class="lesson-navigation">
-          <button class="nav-btn secondary" @click="goBack">← Назад</button>
-          <button class="nav-btn primary" @click="goNext">Далее →</button>
+          <button
+            class="nav-btn secondary"
+            :disabled="!previousLesson"
+            @click="goPrevious"
+          >
+            ← Назад
+          </button>
+
+          <button
+            class="nav-btn primary"
+            :disabled="!nextLesson"
+            @click="goNext"
+          >
+            Далее →
+          </button>
         </div>
       </template>
     </main>
@@ -482,6 +538,11 @@ watch(
 .nav-btn.primary:hover {
   background: #b74234;
   transform: translateY(-1px);
+}
+.nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (max-width: 980px) {
