@@ -48,6 +48,11 @@ const applyTheme = (theme) => {
   localStorage.setItem("theme", theme);
 };
 
+const changeTheme = (theme) => {
+  selectedTheme.value = theme;
+  applyTheme(theme);
+};
+
 onMounted(() => {
   username.value = auth.user?.username || "";
   email.value = auth.user?.email || "";
@@ -169,12 +174,13 @@ const logout = async () => {
 
 <template>
   <div class="settings-layout">
-    <SideBar />
+    <SideBar :theme="selectedTheme" />
 
     <main class="settings-content">
       <AppHeader
         :logoTo="{ name: 'lessons' }"
         :clickableNameTo="{ name: 'my-submissions' }"
+        :theme="selectedTheme"
       />
 
       <section class="settings-hero">
@@ -235,7 +241,7 @@ const logout = async () => {
                 type="button"
                 class="theme-btn"
                 :class="{ active: selectedTheme === 'light' }"
-                @click="selectedTheme = 'light'"
+                @click="changeTheme('light')"
               >
                 ☀️ Светлая
               </button>
@@ -244,7 +250,7 @@ const logout = async () => {
                 type="button"
                 class="theme-btn"
                 :class="{ active: selectedTheme === 'dark' }"
-                @click="selectedTheme = 'dark'"
+                @click="changeTheme('dark')"
               >
                 🌙 Тёмная
               </button>

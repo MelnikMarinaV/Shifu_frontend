@@ -12,6 +12,10 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  theme: {
+    type: String,
+    default: () => localStorage.getItem("theme") || "light",
+  },
 });
 
 const auth = useAuthStore();
@@ -96,7 +100,10 @@ const handleFileChange = async (event) => {
 </script>
 
 <template>
-  <header class="app-header">
+  <header
+    class="app-header"
+    :class="props.theme === 'dark' ? 'header-dark' : 'header-light'"
+  >
     <div class="header-left">
       <RouterLink :to="logoTo" class="brand-link">
         <div class="logo-shell">
@@ -410,5 +417,57 @@ const handleFileChange = async (event) => {
   .logout-btn {
     width: 100%;
   }
+}
+
+.header-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.16),
+      transparent 34%
+    ),
+    linear-gradient(135deg, rgba(15, 15, 20, 0.92), rgba(26, 26, 32, 0.86));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.45);
+}
+
+.header-dark .logo-shell {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.header-dark .logo {
+  filter: brightness(0) invert(1);
+}
+
+.header-dark .brand-text h2 {
+  background: none;
+  color: #ffffff;
+}
+
+.header-dark .brand-text p {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.header-dark .user-panel {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-dark .welcome-text {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.header-dark .user-name {
+  color: #ffffff;
+}
+
+.header-dark .user-name.clickable:hover {
+  color: #ff4b5f;
+}
+
+.header-dark .logout-btn {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  box-shadow: 0 10px 24px rgba(205, 7, 30, 0.28);
 }
 </style>

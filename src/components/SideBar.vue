@@ -37,6 +37,13 @@ const menuItems = [
 ];
 
 const isActive = (item) => route.name === item.activeOn;
+
+const props = defineProps({
+  theme: {
+    type: String,
+    default: () => localStorage.getItem("theme") || "light",
+  },
+});
 </script>
 
 <template>
@@ -44,7 +51,13 @@ const isActive = (item) => route.name === item.activeOn;
 
   <div v-if="isOpen" class="mobile-overlay" @click="closeSidebar"></div>
 
-  <aside class="sidebar" :class="{ open: isOpen }">
+  <aside
+    class="sidebar"
+    :class="[
+      { open: isOpen },
+      props.theme === 'dark' ? 'sidebar-dark' : 'sidebar-light',
+    ]"
+  >
     <button class="close-btn" type="button" @click="closeSidebar">×</button>
     <div class="sidebar-top">
       <RouterLink :to="{ name: 'lessons' }" class="brand" @click="closeSidebar">
@@ -87,7 +100,19 @@ const isActive = (item) => route.name === item.activeOn;
         <span>加油!</span>
       </div>
 
-      <img class="panda-image" src="@/pictures/panda-card.png" alt="Панда" />
+      <img
+        v-if="props.theme === 'dark'"
+        class="panda-image"
+        src="@/pictures/panda-dark.png"
+        alt="Панда"
+      />
+
+      <img
+        v-else
+        class="panda-image"
+        src="@/pictures/panda-card.png"
+        alt="Панда"
+      />
     </div>
   </aside>
 </template>
@@ -315,5 +340,87 @@ const isActive = (item) => route.name === item.activeOn;
     backdrop-filter: none;
     overflow-y: auto;
   }
+}
+
+/* ===== ТЁМНАЯ ТЕМА ===== */
+.sidebar-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.18),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 75, 95, 0.12),
+      transparent 40%
+    ),
+    linear-gradient(180deg, #0a0a0d 0%, #121216 60%, #1a1a20 100%);
+
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.55);
+}
+
+.sidebar-dark .brand-text h2 {
+  color: #ffffff;
+}
+
+.sidebar-dark .brand-text p {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-dark .menu-item {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-dark .menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.sidebar-dark .menu-item.active {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(205, 7, 30, 0.3);
+}
+
+.sidebar-dark .motivation-text p {
+  color: #ffffff;
+}
+
+.sidebar-dark .motivation-text span {
+  color: #ff4b5f;
+}
+
+.sidebar-dark .panda-image {
+  width: 92px;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.5));
+}
+
+/* ===== СВЕТЛАЯ ТЕМА ===== */
+.sidebar-light {
+  background: rgba(255, 255, 255, 0.72);
+  border-right: 1px solid rgba(120, 96, 80, 0.08);
+}
+
+.sidebar-light .menu-item {
+  color: #433b35;
+}
+
+.sidebar-light .menu-item:hover {
+  background: #faf3ef;
+}
+
+.sidebar-light .menu-item.active {
+  background: #f8e8e0;
+  color: #c14b3d;
+}
+
+.sidebar-dark .motivation-card {
+  background:
+    linear-gradient(145deg, rgba(205, 7, 30, 0.22), rgba(0, 0, 0, 0.78)),
+    #15151b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
 }
 </style>
