@@ -16,6 +16,13 @@ const error = ref("");
 const searchQuery = ref("");
 const submissions = ref([]);
 
+const selectedTheme = ref(localStorage.getItem("theme") || "light");
+
+const applyTheme = (theme) => {
+  document.documentElement.classList.remove("theme-light", "theme-dark");
+  document.documentElement.classList.add(`theme-${theme}`);
+};
+
 const lessonImages = [img1, img2, img3, img4];
 
 const getLessonIcon = (index) => {
@@ -65,17 +72,24 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+
+  selectedTheme.value = localStorage.getItem("theme") || "light";
+  applyTheme(selectedTheme.value);
 });
 </script>
 
 <template>
-  <div class="lessons-layout">
-    <SideBar />
+  <div
+    class="lessons-layout"
+    :class="selectedTheme === 'dark' ? 'lessons-dark' : 'lessons-light'"
+  >
+    <SideBar :theme="selectedTheme" />
 
     <main class="lessons-content">
       <AppHeader
         :logoTo="{ name: 'lessons-page' }"
         :clickableNameTo="{ name: 'my-submissions' }"
+        :theme="selectedTheme"
       />
 
       <section class="page-title">
@@ -460,5 +474,102 @@ onMounted(async () => {
   .bottom-note button {
     width: 100%;
   }
+}
+
+.lessons-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 75, 95, 0.1),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #050506 0%, #0d0d11 55%, #15151b 100%);
+}
+
+.lessons-dark .page-title h1,
+.lessons-dark .hero-text h2,
+.lessons-dark .lesson-info h3,
+.lessons-dark .bottom-note strong {
+  color: #ffffff;
+}
+
+.lessons-dark .page-title p,
+.lessons-dark .hero-text p,
+.lessons-dark .progress-head,
+.lessons-dark .bottom-note p {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.lessons-dark .hero-card {
+  background:
+    linear-gradient(rgba(10, 10, 13, 0.82), rgba(10, 10, 13, 0.92)),
+    url("../pictures/login-background.png") right center / cover no-repeat;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.lessons-dark .hero-icon {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lessons-dark .search-box,
+.lessons-dark .lesson-card,
+.lessons-dark .bottom-note,
+.lessons-dark .state-card {
+  background: rgba(18, 18, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.lessons-dark .search-box input {
+  color: #ffffff;
+}
+
+.lessons-dark .search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.lessons-dark .lesson-card:hover {
+  border-color: rgba(255, 75, 95, 0.42);
+  box-shadow: 0 18px 40px rgba(205, 7, 30, 0.18);
+}
+
+.lessons-dark .lesson-image {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lessons-dark .lesson-level {
+  background: rgba(205, 7, 30, 0.16);
+  color: #ff4b5f;
+}
+
+.lessons-dark .progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lessons-dark .progress-fill {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+}
+
+.lessons-dark .lesson-button {
+  border-color: rgba(255, 75, 95, 0.45);
+  color: #ff4b5f;
+}
+
+.lessons-dark .lesson-card:hover .lesson-button {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.lessons-dark .state-card.error {
+  background: rgba(205, 7, 30, 0.12);
+  color: #ff8a96;
 }
 </style>

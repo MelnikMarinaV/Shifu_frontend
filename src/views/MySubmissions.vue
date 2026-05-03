@@ -10,6 +10,13 @@ const error = ref("");
 const checkingId = ref(null);
 const searchQuery = ref("");
 
+const selectedTheme = ref(localStorage.getItem("theme") || "light");
+
+const applyTheme = (theme) => {
+  document.documentElement.classList.remove("theme-light", "theme-dark");
+  document.documentElement.classList.add(`theme-${theme}`);
+};
+
 const fetchSubmissions = async () => {
   try {
     loading.value = true;
@@ -121,17 +128,25 @@ const getProgressStyle = (score) => {
   return { "--score": `${score}%` };
 };
 
-onMounted(fetchSubmissions);
+onMounted(() => {
+  selectedTheme.value = localStorage.getItem("theme") || "light";
+  applyTheme(selectedTheme.value);
+  fetchSubmissions();
+});
 </script>
 
 <template>
-  <div class="submissions-layout">
-    <SideBar />
+  <div
+    class="submissions-layout"
+    :class="selectedTheme === 'dark' ? 'submissions-dark' : 'submissions-light'"
+  >
+    <SideBar :theme="selectedTheme" />
 
     <main class="submissions-content">
       <AppHeader
         :logoTo="{ name: 'lessons-page' }"
         :clickableNameTo="{ name: 'my-submissions' }"
+        :theme="selectedTheme"
       />
 
       <section class="page-title">
@@ -684,5 +699,112 @@ onMounted(fetchSubmissions);
   .page-title h1 {
     font-size: 2rem;
   }
+}
+
+.submissions-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 75, 95, 0.1),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #050506 0%, #0d0d11 55%, #15151b 100%);
+}
+
+.submissions-dark .page-title h1,
+.submissions-dark .stat-card h2,
+.submissions-dark .submission-header h3 {
+  color: #ffffff;
+}
+
+.submissions-dark .page-title p,
+.submissions-dark .stat-card p,
+.submissions-dark .stat-card span,
+.submissions-dark .submission-header p,
+.submissions-dark .feedback-text,
+.submissions-dark .submission-date,
+.submissions-dark .score-text {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.submissions-dark .stat-card,
+.submissions-dark .search-box,
+.submissions-dark .submission-card,
+.submissions-dark .state-card {
+  background: rgba(18, 18, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.submissions-dark .search-box input {
+  color: #ffffff;
+}
+
+.submissions-dark .search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.submissions-dark .submission-image {
+  background:
+    linear-gradient(rgba(10, 10, 13, 0.72), rgba(10, 10, 13, 0.88)),
+    url("../pictures/login-background.png") center / cover no-repeat;
+}
+
+.submissions-dark .submission-image span {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.submissions-dark .score-circle::after {
+  background: #121218;
+}
+
+.submissions-dark .score-circle span {
+  color: #ffffff;
+}
+
+.submissions-dark .check-btn {
+  border-color: rgba(255, 75, 95, 0.45);
+  color: #ff4b5f;
+}
+
+.submissions-dark .check-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  color: #ffffff;
+}
+
+.submissions-dark .delete-btn {
+  background: rgba(179, 64, 51, 0.14);
+  border-color: rgba(255, 75, 95, 0.35);
+  color: #ff8a96;
+}
+
+.submissions-dark .delete-btn:hover:not(:disabled) {
+  background: #b34033;
+  color: #ffffff;
+}
+
+.submissions-dark .status-badge.approved {
+  background: rgba(93, 145, 92, 0.18);
+  color: #8fd18b;
+}
+
+.submissions-dark .status-badge.pending {
+  background: rgba(200, 145, 37, 0.18);
+  color: #ffd16a;
+}
+
+.submissions-dark .status-badge.rework {
+  background: rgba(217, 72, 57, 0.18);
+  color: #ff8a96;
+}
+
+.submissions-dark .state-card.error {
+  background: rgba(205, 7, 30, 0.12);
+  color: #ff8a96;
 }
 </style>

@@ -10,6 +10,13 @@ const lessons = ref([]);
 const loading = ref(true);
 const error = ref("");
 
+const selectedTheme = ref(localStorage.getItem("theme") || "light");
+
+const applyTheme = (theme) => {
+  document.documentElement.classList.remove("theme-light", "theme-dark");
+  document.documentElement.classList.add(`theme-${theme}`);
+};
+
 const currentCourse = computed(() => {
   return courses.value.length ? courses.value[0] : null;
 });
@@ -33,17 +40,23 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+  selectedTheme.value = localStorage.getItem("theme") || "light";
+  applyTheme(selectedTheme.value);
 });
 </script>
 
 <template>
-  <div class="page-layout">
-    <SideBar />
+  <div
+    class="page-layout"
+    :class="selectedTheme === 'dark' ? 'page-dark' : 'page-light'"
+  >
+    <SideBar :theme="selectedTheme" />
 
     <main class="page-content">
       <AppHeader
         :logoTo="{ name: 'lessons' }"
         :clickableNameTo="{ name: 'my-submissions' }"
+        :theme="selectedTheme"
       />
 
       <section class="hero">
@@ -374,5 +387,111 @@ onMounted(async () => {
   .lesson-card {
     padding: 20px;
   }
+}
+
+.page-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 75, 95, 0.1),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #050506 0%, #0d0d11 55%, #15151b 100%);
+}
+
+.page-dark .hero {
+  background:
+    linear-gradient(rgba(10, 10, 13, 0.82), rgba(10, 10, 13, 0.92)),
+    url("../pictures/login-background.png") right center / cover no-repeat;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.page-dark .hero-label {
+  color: #ff4b5f;
+}
+
+.page-dark .hero-title {
+  color: #ffffff;
+}
+
+.page-dark .hero-text {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.page-dark .lessons-section {
+  background: rgba(18, 18, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+}
+
+.page-dark .section-header h2 {
+  color: #ffffff;
+}
+
+.page-dark .section-header p {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.page-dark .lessons-count {
+  background: rgba(205, 7, 30, 0.16);
+  border: 1px solid rgba(255, 75, 95, 0.35);
+  color: #ff4b5f;
+}
+
+.page-dark .lesson-card {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.14),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #17171d 0%, #101014 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+
+.page-dark .lesson-card:hover {
+  border-color: rgba(255, 75, 95, 0.42);
+  box-shadow: 0 18px 40px rgba(205, 7, 30, 0.18);
+}
+
+.page-dark .lesson-title {
+  color: #ffffff;
+}
+
+.page-dark .lesson-description {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.page-dark .lesson-chip {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ff4b5f;
+  border: 1px solid rgba(255, 75, 95, 0.28);
+}
+
+.page-dark .lesson-number {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+}
+
+.page-dark .lesson-link {
+  color: #ff4b5f;
+}
+
+.page-dark .state-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.page-dark .error-state {
+  background: rgba(205, 7, 30, 0.12);
+  border-color: rgba(255, 75, 95, 0.32);
+  color: #ff8a96;
 }
 </style>

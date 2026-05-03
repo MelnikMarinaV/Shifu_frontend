@@ -173,7 +173,10 @@ const logout = async () => {
 </script>
 
 <template>
-  <div class="settings-layout">
+  <div
+    class="settings-layout"
+    :class="selectedTheme === 'dark' ? 'settings-dark' : 'settings-light'"
+  >
     <SideBar :theme="selectedTheme" />
 
     <main class="settings-content">
@@ -562,5 +565,99 @@ const logout = async () => {
   .settings-hero h1 {
     font-size: 2rem;
   }
+}
+
+.settings-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 75, 95, 0.1),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #050506 0%, #0d0d11 55%, #15151b 100%);
+}
+
+.settings-dark .settings-hero {
+  background:
+    linear-gradient(rgba(10, 10, 13, 0.82), rgba(10, 10, 13, 0.9)),
+    url("../pictures/login-background.png") right center / cover no-repeat;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.settings-dark .hero-label {
+  color: #ff4b5f;
+}
+
+.settings-dark .settings-hero h1 {
+  color: #ffffff;
+}
+
+.settings-dark .settings-hero p {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.settings-dark .settings-card {
+  background: rgba(18, 18, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+}
+
+.settings-dark .settings-card h2,
+.settings-dark .profile-row h3 {
+  color: #ffffff;
+}
+
+.settings-dark .profile-row {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.settings-dark .profile-row p,
+.settings-dark .field label {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.settings-dark .field input {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.settings-dark .field input:focus {
+  border-color: #ff4b5f;
+  box-shadow: 0 0 0 4px rgba(255, 75, 95, 0.14);
+}
+
+.settings-dark .theme-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.settings-dark .theme-btn:hover,
+.settings-dark .theme-btn.active {
+  background: rgba(205, 7, 30, 0.18);
+  border-color: #ff4b5f;
+  color: #ffffff;
+}
+
+.settings-dark .logout-btn {
+  color: #ff4b5f;
+  border-color: rgba(255, 75, 95, 0.45);
+}
+
+.settings-dark .logout-btn:hover {
+  background: rgba(205, 7, 30, 0.14);
+}
+
+.settings-dark .save-btn {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  box-shadow: 0 10px 24px rgba(205, 7, 30, 0.28);
 }
 </style>
