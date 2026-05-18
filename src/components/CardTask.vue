@@ -6,6 +6,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  theme: {
+    type: String,
+    default: "light",
+  },
 });
 
 const selectedChinese = ref(null);
@@ -73,7 +77,10 @@ const progress = computed(() => {
 </script>
 
 <template>
-  <div class="card-task">
+  <div
+    class="card-task"
+    :class="props.theme === 'dark' ? 'card-task-dark' : 'card-task-light'"
+  >
     <div class="task-header">
       <div>
         <h3>Сопоставьте пары</h3>
@@ -375,5 +382,86 @@ const progress = computed(() => {
   .column {
     padding: 14px;
   }
+}
+
+.card-task-dark .task-header h3,
+.card-task-dark .column-title h4 {
+  color: #ffffff;
+}
+
+.card-task-dark .task-header p {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.card-task-dark .progress-pill {
+  background: rgba(205, 7, 30, 0.16);
+  color: #ff4b5f;
+  border: 1px solid rgba(255, 75, 95, 0.32);
+}
+
+.card-task-dark .progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.card-task-dark .progress-fill {
+  background: linear-gradient(90deg, #cd071e 0%, #ff4b5f 100%);
+}
+
+.card-task-dark .column {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.card-task-dark .column-title span {
+  background: rgba(205, 7, 30, 0.16);
+  color: #ff4b5f;
+}
+
+.card-task-dark .match-card {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.08),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #17171d 0%, #101014 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.card-task-dark .match-card:hover:not(.matched) {
+  border-color: rgba(255, 75, 95, 0.42);
+  box-shadow: 0 12px 24px rgba(205, 7, 30, 0.14);
+}
+
+.card-task-dark .match-card.selected {
+  border-color: #ff4b5f;
+  background: rgba(205, 7, 30, 0.18);
+  color: #ff4b5f;
+  box-shadow: 0 0 0 4px rgba(255, 75, 95, 0.14);
+}
+
+.card-task-dark .match-card.matched {
+  border-color: rgba(143, 209, 139, 0.35);
+  background: rgba(93, 145, 92, 0.16);
+  color: #8fd18b;
+}
+
+.card-task-dark .match-card.wrong {
+  border-color: rgba(255, 138, 150, 0.42);
+  background: rgba(205, 7, 30, 0.16);
+  color: #ff8a96;
+}
+
+.card-task-dark .success-feedback {
+  background: rgba(93, 145, 92, 0.16);
+  color: #8fd18b;
+  border: 1px solid rgba(143, 209, 139, 0.35);
+}
+
+.card-task-dark .wrong-feedback {
+  background: rgba(205, 7, 30, 0.16);
+  color: #ff8a96;
+  border: 1px solid rgba(255, 138, 150, 0.38);
 }
 </style>

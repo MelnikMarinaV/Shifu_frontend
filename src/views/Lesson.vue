@@ -17,6 +17,13 @@ const loading = ref(true);
 const error = ref("");
 const submissions = ref([]);
 
+const selectedTheme = ref(localStorage.getItem("theme") || "light");
+
+const applyTheme = (theme) => {
+  document.documentElement.classList.remove("theme-light", "theme-dark");
+  document.documentElement.classList.add(`theme-${theme}`);
+};
+
 const lessons = ref([]);
 
 const currentLessonId = computed(() => Number(route.params.id));
@@ -113,6 +120,8 @@ const goNext = () => {
 };
 
 onMounted(async () => {
+  selectedTheme.value = localStorage.getItem("theme") || "light";
+  applyTheme(selectedTheme.value);
   await loadLessonsList();
   await loadLesson();
   await loadSubmissions();
@@ -128,13 +137,17 @@ watch(
 </script>
 
 <template>
-  <div class="lesson-layout">
-    <SideBar />
+  <div
+    class="lesson-layout"
+    :class="selectedTheme === 'dark' ? 'lesson-dark' : 'lesson-light'"
+  >
+    <SideBar :theme="selectedTheme" />
 
     <main class="lesson-content">
       <AppHeader
         :logoTo="{ name: 'lessons-page' }"
         :clickableNameTo="{ name: 'my-submissions' }"
+        :theme="selectedTheme"
       />
 
       <div class="breadcrumbs">
@@ -210,6 +223,7 @@ watch(
                 :initial_text="item.title"
                 :pinini="item.task_description"
                 :task_id="item.id"
+                :theme="selectedTheme"
               />
             </div>
           </div>
@@ -229,7 +243,7 @@ watch(
           </div>
 
           <div class="card-task-wrapper">
-            <CardTask :items="items" />
+            <CardTask :items="items" :theme="selectedTheme" />
           </div>
 
           <div class="success-box">
@@ -611,5 +625,132 @@ watch(
   .nav-btn {
     width: 100%;
   }
+}
+
+.lesson-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 75, 95, 0.1),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #050506 0%, #0d0d11 55%, #15151b 100%);
+}
+
+.lesson-dark .breadcrumbs,
+.lesson-dark .lesson-top p,
+.lesson-dark .card-title p,
+.lesson-dark .lesson-theory,
+.lesson-dark .example-box ul,
+.lesson-dark .tip-box {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.lesson-dark .breadcrumbs a {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.lesson-dark .breadcrumbs a:hover {
+  color: #ff4b5f;
+}
+
+.lesson-dark .lesson-top h1,
+.lesson-dark .card-title h2,
+.lesson-dark .lesson-theory :deep(h2),
+.lesson-dark .lesson-theory :deep(h3),
+.lesson-dark .example-box strong {
+  color: #ffffff;
+}
+
+.lesson-dark .progress-widget {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.lesson-dark .progress-widget small {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.lesson-dark .progress-circle {
+  background: #121218;
+  color: #ffffff;
+  border-color: #ff4b5f;
+}
+
+.lesson-dark .content-card,
+.lesson-dark .state-card {
+  background: rgba(18, 18, 24, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+}
+
+.lesson-dark .theory-inner,
+.lesson-dark .audio-task-shell,
+.lesson-dark .card-task-wrapper {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.lesson-dark .lesson-theory :deep(.characters) {
+  color: #ff4b5f;
+  background: rgba(205, 7, 30, 0.16);
+}
+
+.lesson-dark .example-box {
+  background: rgba(93, 145, 92, 0.12);
+  border: 1px solid rgba(93, 145, 92, 0.24);
+}
+
+.lesson-dark .example-title {
+  color: #8fd18b;
+}
+
+.lesson-dark .tip-box {
+  background: rgba(200, 145, 37, 0.14);
+  border: 1px solid rgba(200, 145, 37, 0.28);
+}
+
+.lesson-dark .success-box {
+  background: rgba(93, 145, 92, 0.14);
+  border: 1px solid rgba(93, 145, 92, 0.28);
+  color: #8fd18b;
+}
+
+.lesson-dark .title-icon.red {
+  background: rgba(205, 7, 30, 0.16);
+  color: #ff4b5f;
+}
+
+.lesson-dark .title-icon.green {
+  background: rgba(93, 145, 92, 0.16);
+  color: #8fd18b;
+}
+
+.lesson-dark .title-icon.grey {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.lesson-dark .nav-btn.secondary {
+  color: #ff4b5f;
+  border-color: rgba(255, 75, 95, 0.45);
+}
+
+.lesson-dark .nav-btn.secondary:hover {
+  background: rgba(205, 7, 30, 0.14);
+}
+
+.lesson-dark .nav-btn.primary {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  box-shadow: 0 10px 24px rgba(205, 7, 30, 0.28);
+}
+
+.lesson-dark .state-card.error {
+  background: rgba(205, 7, 30, 0.12);
+  color: #ff8a96;
 }
 </style>

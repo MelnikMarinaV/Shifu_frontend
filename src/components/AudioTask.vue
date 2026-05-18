@@ -15,6 +15,10 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  theme: {
+    type: String,
+    default: "light",
+  },
 });
 
 const show = ref(false);
@@ -113,7 +117,10 @@ const toggleRecording = async () => {
 </script>
 
 <template>
-  <div class="audio-task">
+  <div
+    class="audio-task"
+    :class="props.theme === 'dark' ? 'audio-task-dark' : 'audio-task-light'"
+  >
     <div class="task-main">
       <button class="icon-btn play-btn" type="button" @click="playAudio">
         ▶
@@ -336,5 +343,69 @@ const toggleRecording = async () => {
   .hanzi {
     font-size: 2.2rem;
   }
+}
+
+.audio-task-dark {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(205, 7, 30, 0.14),
+      transparent 36%
+    ),
+    linear-gradient(180deg, #17171d 0%, #101014 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+}
+
+.audio-task-dark .icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ff4b5f;
+}
+
+.audio-task-dark .icon-btn:hover {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  color: #ffffff;
+}
+
+.audio-task-dark .hanzi {
+  color: #ffffff;
+}
+
+.audio-task-dark .pinini {
+  color: #ff4b5f;
+}
+
+.audio-task-dark .record-btn {
+  background: linear-gradient(135deg, #cd071e, #ff4b5f);
+  box-shadow: 0 10px 24px rgba(205, 7, 30, 0.28);
+}
+
+.audio-task-dark .record-btn.recording {
+  background: #ffffff;
+  color: #121218;
+}
+
+.audio-task-dark .record-btn.recording .record-dot {
+  background: #cd071e;
+}
+
+.audio-task-dark .task-status {
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.audio-task-dark .default-status {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.audio-task-dark .recording-status {
+  color: #ff4b5f;
+}
+
+.audio-task-dark .uploading-status {
+  color: #ffd16a;
+}
+
+.audio-task-dark .uploaded-status {
+  color: #8fd18b;
 }
 </style>
