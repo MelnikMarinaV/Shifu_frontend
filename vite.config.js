@@ -19,7 +19,7 @@ export default defineConfig({
     proxy: {
       "/api/": {
         // Прокси для запросов к бэкенду
-        target: "http://localhost:8001", // Адрес бэкенда
+        target: "http://localhost:8000", // Адрес бэкенда
         changeOrigin: true,
       },
     },
